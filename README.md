@@ -81,26 +81,26 @@ The system modelled across four trust boundary zones:
 ```mermaid
 flowchart TD
     subgraph Internet ["🌐 Internet (Untrusted)"]
-        User["Patient / Doctor\n(Browser / Mobile)"]
-        Lab["Lab System\n(Third-party vendor)"]
+        User["Patient / Doctor<br/>(Browser / Mobile)"]
+        Lab["Lab System<br/>(Third-party vendor)"]
         Attacker["⚠️ Threat Actor"]
     end
 
-    subgraph DMZ ["🔶 DMZ — AWS API Gateway + WAF"]
-        APIGW["API Gateway\n+ WAF + Rate Limiting"]
-        Auth["Auth Service\n(JWT + MFA)"]
+    subgraph DMZ ["🔶 DMZ — AWS API Gateway + WAF + Rate Limiting"]
+        APIGW["API Gateway<br/>WAF + Rate Limiting"]
+        Auth["Auth Service<br/>JWT + MFA"]
     end
 
     subgraph AppLayer ["🔷 Application Layer — ECS Fargate"]
-        API["REST API\n(Node.js)"]
+        API["REST API<br/>Node.js"]
         RecordSvc["Patient Record Service"]
         NotifySvc["Notification Service"]
     end
 
     subgraph DataLayer ["🔴 Data Layer — Private Subnet"]
-        RDS["RDS PostgreSQL\n(Encrypted at rest)"]
-        S3["S3 Bucket\n(PHI documents)"]
-        Audit["Audit Log\n(CloudWatch)"]
+        RDS["RDS PostgreSQL<br/>Encrypted at rest"]
+        S3["S3 Bucket<br/>PHI documents"]
+        Audit["Audit Log<br/>CloudWatch"]
     end
 
     User -->|HTTPS| APIGW
@@ -214,24 +214,24 @@ Full simulation with detection point analysis is in [`reports/attack-simulation.
 ```
 Complete-threat-model-for-healthcare-application/
 │
-├── README.md                          # This file
+├── README.md                          # Project overview and documentation
+│
+├── diagrams/
+│   ├── architecture.md                # System architecture and trust boundaries
+│   ├── attack-trees.md                # Attack trees for all attacker goals
+│   ├── dfd-level0.md                  # Level 0 Data Flow Diagram (context)
+│   └── dfd-level1.md                  # Level 1 Data Flow Diagram (detail)
 │
 ├── reports/
-│   ├── 01-system-overview.md          # Platform architecture and trust boundaries
-│   ├── 02-data-flow-diagram.md        # DFD with all data flows and trust zones
-│   ├── 03-stride-analysis.md          # Full STRIDE threat catalogue (25 threats)
-│   ├── 04-risk-register.md            # DREAD-scored risk register
-│   ├── 05-mitre-attack-mapping.md     # ATT&CK technique mapping per threat
-│   ├── 06-kill-chain-analysis.md      # Cyber Kill Chain per attack scenario
-│   ├── 07-attack-trees.md             # Attack trees for all three attacker goals
-│   ├── 08-attack-simulation.md        # APT day-by-day simulation with detection points
-│   ├── 09-nist-csf-controls.md        # Control mapping and gap analysis
-│   └── 10-remediation-roadmap.md      # Prioritised remediation with effort/impact matrix
+│   ├── solaris-layer.json             # Structured threat data (machine-readable)
+│   └── threat-model-report.md         # Full consolidated threat model report
 │
-└── diagrams/
-    ├── architecture-overview.png
-    ├── data-flow-diagram.png
-    └── attack-tree-phi-theft.png
+└── templates/
+    ├── kill-chain-analysis.md         # Cyber Kill Chain per attack scenario
+    ├── mitre-mapping.md               # MITRE ATT&CK technique mapping
+    ├── risk-register.md               # DREAD-scored risk register (25 threats)
+    ├── security-control-mapping.md    # NIST CSF control mapping and gap analysis
+    └── stride-threats.md              # STRIDE threat catalogue
 ```
 
 ---
