@@ -80,27 +80,27 @@ The system modelled across four trust boundary zones:
 
 ```mermaid
 flowchart TD
-    subgraph Internet ["🌐 Internet (Untrusted)"]
+    subgraph Internet ["🌐 Untrusted Internet"]
         User["Patient / Doctor<br/>(Browser / Mobile)"]
         Lab["Lab System<br/>(Third-party vendor)"]
         Attacker["⚠️ Threat Actor"]
     end
 
-    subgraph DMZ ["🔶 DMZ — AWS API Gateway + WAF + Rate Limiting"]
+    subgraph DMZ ["🔶 DMZ"]
         APIGW["API Gateway<br/>WAF + Rate Limiting"]
         Auth["Auth Service<br/>JWT + MFA"]
     end
 
-    subgraph AppLayer ["🔷 Application Layer — ECS Fargate"]
-        API["REST API<br/>Node.js"]
+    subgraph AppLayer ["🔷 Application Layer"]
+        API["REST API — Node.js<br/>ECS Fargate"]
         RecordSvc["Patient Record Service"]
         NotifySvc["Notification Service"]
     end
 
-    subgraph DataLayer ["🔴 Data Layer — Private Subnet"]
+    subgraph DataLayer ["🔴 Data Layer"]
         RDS["RDS PostgreSQL<br/>Encrypted at rest"]
-        S3["S3 Bucket<br/>PHI documents"]
-        Audit["Audit Log<br/>CloudWatch"]
+        S3["S3 Bucket — PHI"]
+        Audit["Audit Log — CloudWatch"]
     end
 
     User -->|HTTPS| APIGW
