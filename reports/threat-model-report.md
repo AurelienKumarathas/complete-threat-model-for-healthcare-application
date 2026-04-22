@@ -376,7 +376,7 @@ does not meet HIPAA security requirements.
 | GAP-9 | I4 | HSTS headers configured | Low |
 | GAP-10 | I5 | S3 backup bucket public access blocked | Low |
 
-**Full gap register (18 gaps) available in:** `reports/security-control-mapping.md`
+**Full gap register (18 gaps) available in:** [`reports/analyses/security-control-mapping.md`](../reports/analyses/security-control-mapping.md)
 
 ---
 
@@ -479,14 +479,14 @@ This section maps key recommendations to the regulatory controls they satisfy.
 
 | Appendix | Document | Contents |
 |----------|----------|---------|
-| A | `reports/stride-threat-register.md` | All 25 STRIDE threats, full register |
-| B | `reports/mitre-attack-mapping.md` | MITRE ATT&CK mapping, 5 attack chains |
-| C | `reports/kill-chain-analysis.md` | 5 kill chain scenarios with controls |
-| D | `reports/risk-register.md` | Full risk register with DREAD scores |
-| E | `reports/security-control-mapping.md` | 53 controls mapped, 18 gaps identified |
-| F | `diagrams/architecture.md` | System architecture diagram |
-| G | `diagrams/dfd-level0.md` | Level 0 data flow diagram |
-| H | `diagrams/dfd-level1.md` | Level 1 data flow diagram |
+| A | [`reports/analyses/stride-threats.md`](../reports/analyses/stride-threats.md) | All 25 STRIDE threats, full register |
+| B | [`reports/analyses/mitre-mapping.md`](../reports/analyses/mitre-mapping.md) | MITRE ATT&CK mapping, 5 attack chains |
+| C | [`reports/analyses/kill-chain-analysis.md`](../reports/analyses/kill-chain-analysis.md) | 5 kill chain scenarios with controls |
+| D | [`reports/analyses/risk-register.md`](../reports/analyses/risk-register.md) | Full risk register with DREAD scores |
+| E | [`reports/analyses/security-control-mapping.md`](../reports/analyses/security-control-mapping.md) | 53 controls mapped, 18 gaps identified |
+| F | [`diagrams/architecture.md`](../diagrams/architecture.md) | System architecture diagram |
+| G | [`diagrams/dfd-level0.md`](../diagrams/dfd-level0.md) | Level 0 data flow diagram |
+| H | [`diagrams/dfd-level1.md`](../diagrams/dfd-level1.md) | Level 1 data flow diagram |
 
 ---
 
