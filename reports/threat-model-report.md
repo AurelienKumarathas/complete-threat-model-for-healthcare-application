@@ -220,15 +220,20 @@ Each letter represents a different type of attack:
 
 ### 3.2 STRIDE Threat Summary
 
+> **Note on scope:** 25 threats are carried forward to the risk register and
+> scored. The per-category counts below reflect the full enumeration; threats
+> marked as out-of-scope for the current architecture (physical access,
+> third-party internal posture) are excluded from risk scoring.
+
 | Category | Threats Identified | 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |
 |----------|:-----------------:|:-----------:|:-------:|:---------:|:------:|
-| Spoofing | 5 | 1 | 2 | 1 | 1 |
-| Tampering | 5 | 3 | 2 | 0 | 0 |
-| Repudiation | 5 | 0 | 2 | 3 | 0 |
-| Information Disclosure | 6 | 3 | 2 | 1 | 0 |
-| Denial of Service | 5 | 0 | 3 | 2 | 0 |
-| Elevation of Privilege | 5 | 3 | 1 | 1 | 0 |
-| **Total** | **31** | **10** | **12** | **8** | **1** |
+| Spoofing | 4 | 1 | 2 | 1 | 0 |
+| Tampering | 4 | 0 | 2 | 2 | 0 |
+| Repudiation | 3 | 0 | 2 | 1 | 0 |
+| Information Disclosure | 6 | 1 | 2 | 2 | 1 |
+| Denial of Service | 4 | 0 | 1 | 2 | 1 |
+| Elevation of Privilege | 4 | 0 | 2 | 2 | 0 |
+| **Total** | **25** | **2** | **11** | **10** | **2** |
 
 ### 3.3 MITRE ATT&CK Coverage
 
