@@ -20,8 +20,11 @@ diagnostic laboratories.
 This threat model was conducted using three industry-standard frameworks:
 **STRIDE** (threat categorisation), **MITRE ATT&CK** (real-world technique
 mapping), and the **Cyber Kill Chain** (attack narrative modelling). Risk
-scores were calculated using a Likelihood × Impact matrix, supplemented
-by DREAD scoring for the five highest-priority threats.
+scores were calculated using a Likelihood × Impact matrix for prioritisation
+across all 25 threats, supplemented by DREAD scoring for the five
+highest-priority threats where granular component-level analysis was required.
+See [Section 4.1](#41-risk-scoring-methodology) for a full explanation of
+how the two methods relate.
 
 ### Risk Posture at a Glance
 
@@ -53,20 +56,20 @@ by DREAD scoring for the five highest-priority threats.
 
 ### Top 3 Findings
 
-**Finding 1 — SQL Injection (I1) — Risk Score: 20/25**
+**Finding 1 — SQL Injection (I1) — Risk Score: 20/25 | DREAD: 9.4/10**
 The patient records API does not consistently use parameterised queries,
 and no Web Application Firewall is deployed. A successful SQL injection
 attack would expose the entire patient database and could escalate to
 full server compromise. This is the highest-priority vulnerability in
 the register.
 
-**Finding 2 — Credential Theft via Phishing (S1) — Risk Score: 16/25**
+**Finding 2 — Credential Theft via Phishing (S1) — Risk Score: 16/25 | DREAD: 8.8/10**
 MFA is enforced for admin accounts only. Clinical and patient accounts
 remain accessible with a password alone. Given that phishing is the
 #1 initial access vector in healthcare, this represents an unacceptable
 gap for a live system.
 
-**Finding 3 — Exposed Backup Files (I5) — DREAD Score: 9.8/10**
+**Finding 3 — Exposed Backup Files (I5) — Risk Score: 15/25 | DREAD: 9.8/10**
 The S3 backup bucket has not been audited for public access configuration.
 An exposed bucket requires zero technical skill to exploit — automated
 scanners discover and download public S3 buckets within minutes of
@@ -118,7 +121,7 @@ each serving a distinct purpose:
 | **STRIDE** | Categorise all threats by type | 25 threats across 6 categories |
 | **MITRE ATT&CK** | Map threats to real-world attacker techniques | 21 techniques, 10 tactics covered |
 | **Cyber Kill Chain** | Model complete attack narratives (7 stages) | 5 attack scenarios |
-| **Likelihood × Impact + DREAD** | Score and rank every threat | Risk register with 25 entries |
+| **Likelihood × Impact + DREAD** | Score and rank every threat | Risk register with 25 entries; DREAD deep-dive on top 5 |
 
 ### 1.3 Regulatory Context
 
@@ -291,6 +294,24 @@ initial reconnaissance to final impact.
 
 ### 4.1 Risk Scoring Methodology
 
+This threat model uses **two complementary scoring methods** applied at
+different levels of depth. They are not redundant — they serve different
+audiences and answer different questions.
+
+#### Why Two Methods?
+
+| Method | Audience | Question Answered | Applied To |
+|--------|----------|------------------|------------|
+| **Likelihood × Impact (L×I)** | Executive, governance, programme management | *Which threats matter most and in what order?* | All 25 threats |
+| **DREAD** | Security engineers, developers, red team | *How technically exploitable is this specific vulnerability?* | Top 5 threats only |
+
+L×I is fast, consistent, and easy to communicate to non-technical
+stakeholders. DREAD provides component-level granularity — breaking
+exploitability into five dimensions — for the highest-priority threats
+where engineering decisions depend on that detail.
+
+#### Likelihood × Impact (L×I)
+
 Every threat is scored using the formula:
 
 > **Risk Score = Likelihood (1–5) × Impact (1–5) = Score (1–25)**
@@ -301,6 +322,53 @@ Every threat is scored using the formula:
 | 10–15 | 🟠 High | Resolve within 30 days |
 | 5–9 | 🟡 Medium | Resolve within 90 days |
 | 1–4 | 🟢 Low | Accept or address when convenient |
+
+#### DREAD
+
+DREAD scores each threat across five dimensions, each rated 1–10:
+
+| Dimension | Question |
+|-----------|----------|
+| **D** — Damage | How severe is the damage if exploited? |
+| **R** — Reproducibility | How easily can the attack be reproduced? |
+| **E** — Exploitability | How much skill or effort does exploitation require? |
+| **A** — Affected Users | What proportion of users are impacted? |
+| **Di** — Discoverability | How easy is it for an attacker to find this vulnerability? |
+
+> **DREAD Score = (D + R + E + A + Di) ÷ 5**
+
+#### Scoring Bridge — Top 5 Threats (Both Methods)
+
+The table below shows how the two scoring methods relate for the five
+highest-priority threats. A high L×I score reflects strategic business
+risk; a high DREAD score reflects technical exploitability. Both are
+relevant — a threat that is easy to exploit *and* carries high business
+impact is always the most urgent priority.
+
+| Threat | L×I Score | L×I Priority | DREAD Score | DREAD Interpretation | Consistent? |
+|--------|:---------:|:------------:|:-----------:|---------------------|:-----------:|
+| SQL Injection — PHI Breach (I1) | 20/25 | 🔴 Critical | 9.4/10 | Trivial to exploit, entire DB at risk | ✅ Yes |
+| Exposed Backup Files (I5) | 15/25 | 🟠 High | 9.8/10 | Zero skill required, automated discovery | ⚠️ DREAD higher¹ |
+| Credential Stuffing (S3) | 14/25 | 🟠 High | 8.8/10 | No MFA, tools freely available | ✅ Yes |
+| Insider Bulk Export (E2) | 12/25 | 🟠 High | 8.6/10 | Valid credentials, no UBA detection | ✅ Yes |
+| Ransomware via Phishing (T5) | 12/25 | 🟠 High | 8.4/10 | Commodity tooling, wide attack surface | ✅ Yes |
+
+> **¹ Note on I5 (Exposed Backup Files):** DREAD scores this higher than L×I
+> because the Likelihood score (3/5) reflects that the misconfiguration
+> *may not* be present — it has not yet been confirmed. If confirmed exposed,
+> the L×I score would rise to 25/25 (Critical). The DREAD score captures
+> the near-zero exploitability barrier if the misconfiguration exists.
+> This is an intentional methodological difference, not an error.
+
+#### When to Use Each Score
+
+- **Use L×I scores** when communicating with executives, writing risk
+  registers, or comparing threats for prioritisation.
+- **Use DREAD scores** when briefing engineering teams, writing remediation
+  tickets, or assessing whether a specific fix changes the exploitability
+  profile of a vulnerability.
+
+---
 
 ### 4.2 Risk Matrix
 
@@ -314,18 +382,21 @@ Every threat is scored using the formula:
 
 ### 4.3 Top 10 Scored Risks
 
-| Rank | ID | Threat | Likelihood | Impact | Score | Priority |
-|------|----|--------|:----------:|:------:|:-----:|----------|
-| 1 | I1 | SQL Injection — PHI Breach | 4 | 5 | **20** | 🔴 Critical |
-| 2 | S1 | Credential Theft via Phishing | 4 | 4 | **16** | 🔴 Critical |
-| 3 | E4 | Container Escape to Host | 3 | 5 | **15** | 🟠 High |
-| 3 | E3 | SQLi → DBA Access | 3 | 5 | **15** | 🟠 High |
-| 3 | I4 | Unencrypted Data in Transit | 3 | 5 | **15** | 🟠 High |
-| 3 | I5 | Exposed Backup Files | 3 | 5 | **15** | 🟠 High |
-| 3 | S2 | Fake Doctor Accounts | 3 | 5 | **15** | 🟠 High |
-| 8 | E1 | Patient → Doctor Privilege | 3 | 4 | **12** | 🟠 High |
-| 8 | T1 | Patient Record Modification | 3 | 4 | **12** | 🟠 High |
-| 8 | I2 | Excessive Data Return | 4 | 3 | **12** | 🟠 High |
+| Rank | ID | Threat | Likelihood | Impact | L×I Score | DREAD Score | Priority |
+|------|----|--------|:----------:|:------:|:---------:|:-----------:|----------|
+| 1 | I1 | SQL Injection — PHI Breach | 4 | 5 | **20** | **9.4** | 🔴 Critical |
+| 2 | S1 | Credential Theft via Phishing | 4 | 4 | **16** | **8.8** | 🔴 Critical |
+| 3 | E4 | Container Escape to Host | 3 | 5 | **15** | — | 🟠 High |
+| 3 | E3 | SQLi → DBA Access | 3 | 5 | **15** | — | 🟠 High |
+| 3 | I4 | Unencrypted Data in Transit | 3 | 5 | **15** | — | 🟠 High |
+| 3 | I5 | Exposed Backup Files | 3 | 5 | **15** | **9.8** | 🟠 High |
+| 3 | S2 | Fake Doctor Accounts | 3 | 5 | **15** | — | 🟠 High |
+| 8 | E1 | Patient → Doctor Privilege | 3 | 4 | **12** | — | 🟠 High |
+| 8 | T1 | Patient Record Modification | 3 | 4 | **12** | — | 🟠 High |
+| 8 | I2 | Excessive Data Return | 4 | 3 | **12** | — | 🟠 High |
+
+> DREAD scores are provided for the top 5 threats where engineering-level
+> exploitability analysis was performed. — indicates L×I scoring only.
 
 ### 4.4 Risk Distribution
 
@@ -376,7 +447,7 @@ does not meet HIPAA security requirements.
 | GAP-9 | I4 | HSTS headers configured | Low |
 | GAP-10 | I5 | S3 backup bucket public access blocked | Low |
 
-**Full gap register (18 gaps) available in:** [`reports/analyses/security-control-mapping.md`](../reports/analyses/security-control-mapping.md)
+**Full gap register (18 gaps) available in:** `reports/security-control-mapping.md`
 
 ---
 
@@ -478,15 +549,15 @@ This section maps key recommendations to the regulatory controls they satisfy.
 ## Appendices
 
 | Appendix | Document | Contents |
-|----------|----------|---------|
-| A | [`reports/analyses/stride-threats.md`](../reports/analyses/stride-threats.md) | All 25 STRIDE threats, full register |
-| B | [`reports/analyses/mitre-mapping.md`](../reports/analyses/mitre-mapping.md) | MITRE ATT&CK mapping, 5 attack chains |
-| C | [`reports/analyses/kill-chain-analysis.md`](../reports/analyses/kill-chain-analysis.md) | 5 kill chain scenarios with controls |
-| D | [`reports/analyses/risk-register.md`](../reports/analyses/risk-register.md) | Full risk register with DREAD scores |
-| E | [`reports/analyses/security-control-mapping.md`](../reports/analyses/security-control-mapping.md) | 53 controls mapped, 18 gaps identified |
-| F | [`diagrams/architecture.md`](../diagrams/architecture.md) | System architecture diagram |
-| G | [`diagrams/dfd-level0.md`](../diagrams/dfd-level0.md) | Level 0 data flow diagram |
-| H | [`diagrams/dfd-level1.md`](../diagrams/dfd-level1.md) | Level 1 data flow diagram |
+|----------|----------|---------| 
+| A | `reports/stride-threat-register.md` | All 25 STRIDE threats, full register |
+| B | `reports/mitre-attack-mapping.md` | MITRE ATT&CK mapping, 5 attack chains |
+| C | `reports/kill-chain-analysis.md` | 5 kill chain scenarios with controls |
+| D | `reports/risk-register.md` | Full risk register with DREAD scores |
+| E | `reports/security-control-mapping.md` | 53 controls mapped, 18 gaps identified |
+| F | `diagrams/architecture.md` | System architecture diagram |
+| G | `diagrams/dfd-level0.md` | Level 0 data flow diagram |
+| H | `diagrams/dfd-level1.md` | Level 1 data flow diagram |
 
 ---
 
