@@ -21,7 +21,7 @@ This document does three things:
 Every security control belongs to one of three categories:
 
 | Category | Purpose | Examples |
-|----------|---------|---------|
+|----------|---------|---------| 
 | **Preventive** | Stop an attack before it happens | Firewalls, encryption, MFA, input validation |
 | **Detective** | Identify an attack in progress or after the fact | Logging, SIEM, anomaly detection, audits |
 | **Corrective** | Respond to and recover from an attack | Incident response, backups, patch management |
@@ -42,7 +42,7 @@ security teams worldwide.
 NIST CSF organises controls into five functions:
 
 | Function | Code | Purpose | Example Controls |
-|----------|------|---------|-----------------|
+|----------|------|---------|-----------------| 
 | **Identify** | ID | Understand your assets and risks | Asset inventory, risk assessments |
 | **Protect** | PR | Prevent unauthorised access and harm | MFA, encryption, access controls |
 | **Detect** | DE | Identify attacks when they occur | SIEM, anomaly detection, monitoring |
@@ -211,123 +211,9 @@ Access Control, sub-control 4). These are used throughout this document.
 | GAP-10 | I5 | S3 backup bucket public access not blocked | 🔴 Critical | Low | Pre-launch |
 | GAP-11 | I5 | S3 versioning and object lock not enabled | 🟠 High | Low | Pre-launch |
 | GAP-12 | I5 | Backup restore never tested | 🟠 High | Medium | 30 days |
-| GAP-13 | E3 | Dangerous stored procedures not disabled | 🟠 High | Low | 30 days |
-| GAP-14 | E4 | Containers not running read-only | 🟠 High | Medium | 30 days |
-| GAP-15 | E4 | No container runtime security (Falco) | 🟠 High | Medium | 30 days |
-| GAP-16 | S2 | No admin approval for new clinician accounts | 🟠 High | Medium | 30 days |
-| GAP-17 | T1 | No field-level integrity hashing on records | 🟠 High | High | 30 days |
-| GAP-18 | I2 | APIs return full object — no field allowlists | 🟠 High | Medium | 30 days |
-
-**Total gaps identified: 18**
-**Pre-launch blockers: 8 (GAP-1, 2, 4, 5, 8, 9, 10)**
-**30-day remediations: 10**
-
----
-
-## NIST CSF Coverage Summary
-
-| NIST Function | Controls Mapped | Implemented | Partial | Missing |
-|---------------|:--------------:|:-----------:|:-------:|:-------:|
-| **Identify** (ID) | 3 | 1 | 1 | 1 |
-| **Protect** (PR) | 28 | 4 | 11 | 13 |
-| **Detect** (DE) | 16 | 2 | 3 | 11 |
-| **Respond** (RS) | 3 | 0 | 1 | 2 |
-| **Recover** (RC) | 3 | 0 | 1 | 2 |
-| **Total** | **53** | **7 (13%)** | **17 (32%)** | **29 (55%)** |
-
-> The Detect, Respond, and Recover functions are significantly under-implemented.
-> A system that prevents attacks but cannot detect or recover from them is
-> not production-ready for a healthcare environment.
-
----
-
-## Control Implementation Roadmap
-
-```mermaid
-gantt
-    title Security Control Implementation — Solaris Care Connect 360
-    dateFormat  YYYY-MM-DD
-    section Pre-Launch Blockers
-    WAF Deployment (GAP-1)              :crit, 2026-03-09, 7d
-    Fix verbose SQL errors (GAP-2)      :crit, 2026-03-09, 3d
-    DB least privilege (GAP-4)          :crit, 2026-03-09, 2d
-    MFA all users (GAP-5)               :crit, 2026-03-09, 7d
-    HTTPS internal services (GAP-8)     :crit, 2026-03-09, 5d
-    HSTS headers (GAP-9)               :crit, 2026-03-09, 1d
-    S3 block public access (GAP-10)    :crit, 2026-03-09, 1d
-    section 30-Day Controls
-    Database Activity Monitoring (GAP-3)    :2026-03-16, 14d
-    Phishing training programme (GAP-6)    :2026-03-16, 21d
-    HaveIBeenPwned integration (GAP-7)     :2026-03-16, 7d
-    S3 versioning + object lock (GAP-11)   :2026-03-16, 3d
-    Backup restore testing (GAP-12)        :2026-03-23, 7d
-    Disable stored procedures (GAP-13)     :2026-03-16, 2d
-    Read-only containers (GAP-14)          :2026-03-23, 10d
-    Falco runtime security (GAP-15)        :2026-03-23, 10d
-    Clinician account approval (GAP-16)    :2026-03-23, 7d
-    section 90-Day Controls
-    Field-level integrity hashing (GAP-17) :2026-04-06, 21d
-    API field allowlists (GAP-18)          :2026-04-06, 14d
-    SIEM detection rules                   :2026-04-06, 30d
-    Quarterly RBAC access review process   :2026-04-20, 14d
-```
-
----
-
-## Defense-in-Depth Visualisation
-
-The diagram below shows how multiple control layers protect against the
-highest-priority threat (SQL injection). Each layer is independent — if
-one fails, the next holds.
-
-```mermaid
-flowchart LR
-    ATK["🔴 Attacker\nSQLi Attempt"]
-
-    subgraph Layer1["Layer 1 — Network"]
-        WAF["WAF\nBlocks SQL keywords\nin parameters"]
-    end
-
-    subgraph Layer2["Layer 2 — Application"]
-        PARAM["Parameterised\nQueries\nInjection impossible"]
-        VALID["Input\nValidation\nReject malformed input"]
-    end
-
-    subgraph Layer3["Layer 3 — Database"]
-        PRIV["Least Privilege\nApp user SELECT only\nNo DBA escalation"]
-        ERR["Error Suppression\nNo SQL errors\nreturned to client"]
-    end
-
-    subgraph Layer4["Layer 4 — Detection"]
-        DAM["Database Activity\nMonitoring\nAlert on anomalies"]
-        SIEM["SIEM Rule\nSQL error spike\ntriggers alert"]
-    end
-
-    ATK --> WAF
-    WAF -->|"If bypassed"| PARAM
-    PARAM -->|"If bypassed"| PRIV
-    PRIV -->|"If bypassed"| DAM
-    VALID --> PARAM
-    ERR --> SIEM
-
-    style Layer1 fill:#ffdddd
-    style Layer2 fill:#ffeedd
-    style Layer3 fill:#ffffdd
-    style Layer4 fill:#ddffdd
-```
-
----
-
-## Glossary
-
-| Term | Definition |
-|------|-----------|
-| **Preventive control** | A measure that stops an attack before it succeeds |
-| **Detective control** | A measure that identifies an attack in progress or after the fact |
-| **Corrective control** | A measure that restores normal operation after an attack |
-| **NIST CSF** | National Institute of Standards and Technology Cybersecurity Framework — the global standard for organising security controls |
-| **Defense-in-depth** | Layering multiple independent controls so that bypassing one does not compromise the whole system |
-| **Control gap** | A risk that has no effective control in place |
-| **Pre-launch blocker** | A gap so severe that the system must not accept live patient data until it is resolved |
-| **DAM** | Database Activity Monitoring — real-time detection of suspicious database queries |
-| **WAF** | Web Application Firewall — filters malicious HTTP requests before they reach the application |
+| GAP-13 | E3 | Dangerous stored procedures not reviewed or disabled | 🟠 High | Low | Pre-launch |
+| GAP-14 | E4 | Containers run with write access — read-only not enforced | 🟠 High | Medium | Pre-launch |
+| GAP-15 | E4 | Falco container runtime security not deployed | 🟠 High | Medium | 30 days |
+| GAP-16 | S2 | New accounts auto-provisioned without admin approval | 🔴 Critical | Medium | Pre-launch |
+| GAP-17 | T1 | No field-level integrity hashing on patient records | 🟠 High | High | 30 days |
+| GAP-18 | I2 | APIs return full object by default — no field allowlists | 🟠 High | Medium | 30 days |
