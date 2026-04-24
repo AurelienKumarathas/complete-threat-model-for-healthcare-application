@@ -3,7 +3,7 @@
 
 | Field | Detail |
 |-------|--------|
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Date** | April 2026 |
 | **Classification** | Confidential |
 | **Review Cycle** | Quarterly, or upon significant system change |
@@ -21,7 +21,7 @@ This threat model was conducted using three industry-standard frameworks:
 **STRIDE** (threat categorisation), **MITRE ATT&CK** (real-world technique
 mapping), and the **Cyber Kill Chain** (attack narrative modelling). Risk
 scores were calculated using a Likelihood × Impact matrix for prioritisation
-across all 25 threats, supplemented by DREAD scoring for the five
+across all 31 threats, supplemented by DREAD scoring for the five
 highest-priority threats where granular component-level analysis was required.
 See [Section 4.1](#41-risk-scoring-methodology) for a full explanation of
 how the two methods relate.
@@ -30,11 +30,11 @@ how the two methods relate.
 
 | Severity | Count | Status |
 |----------|:-----:|--------|
-| 🔴 Critical | 2 | Immediate action required — pre-launch blockers |
-| 🟠 High | 11 | Must be resolved within 30 days of launch |
-| 🟡 Medium | 10 | Must be resolved within 90 days |
+| 🔴 Critical | 12 | Immediate action required — pre-launch blockers |
+| 🟠 High | 13 | Must be resolved within 30 days of launch |
+| 🟡 Medium | 4 | Must be resolved within 90 days |
 | 🟢 Low | 2 | Accept or address when convenient |
-| **Total** | **25** | |
+| **Total** | **31** | |
 
 ### Overall Assessment
 
@@ -45,14 +45,13 @@ how the two methods relate.
 > universal MFA enforcement, and an unaudited S3 backup bucket that may
 > be publicly accessible.
 
-> **Note on pre-launch blocker count:** Two threats are scored Critical
-> (risk score ≥16/25) by the Likelihood × Impact methodology. The eight
-> pre-launch blockers include these two Critical threats **plus** six
-> High-severity threats (score 10–15) where remediation effort is low
-> (≤1 week) and the consequence of deferral — PHI exposure or undetectable
-> breach — is operationally unacceptable before go-live. Resolving
-> high-impact, low-effort gaps pre-launch is standard risk management
-> practice regardless of raw score.
+> **Note on pre-launch blocker count:** Twelve threats are scored Critical
+> by the Likelihood × Impact methodology. The eight pre-launch blockers
+> include the highest-scoring Critical threats **plus** High-severity threats
+> where remediation effort is low (≤1 week) and the consequence of deferral —
+> PHI exposure or undetectable breach — is operationally unacceptable before
+> go-live. Resolving high-impact, low-effort gaps pre-launch is standard
+> risk management practice regardless of raw score.
 
 ### Top 3 Findings
 
@@ -88,8 +87,8 @@ database in a single downloadable file.
 
 ### Estimated Remediation Timeline
 
-- **Pre-launch (this sprint):** 8 pre-launch blockers resolved (2 Critical + 6 High with low remediation effort)
-- **30 days post-launch:** Remaining 5 High-priority gaps resolved
+- **Pre-launch (this sprint):** 8 pre-launch blockers resolved (Critical + High with low remediation effort)
+- **30 days post-launch:** Remaining High-priority gaps resolved
 - **90 days post-launch:** All remaining medium gaps resolved
 - **Total estimated effort:** 10 weeks, 2 engineers
 
@@ -118,10 +117,10 @@ each serving a distinct purpose:
 
 | Methodology | Purpose | Output |
 |-------------|---------|--------|
-| **STRIDE** | Categorise all threats by type | 25 threats across 6 categories |
+| **STRIDE** | Categorise all threats by type | 31 threats across 6 categories |
 | **MITRE ATT&CK** | Map threats to real-world attacker techniques | 21 techniques, 10 tactics covered |
 | **Cyber Kill Chain** | Model complete attack narratives (7 stages) | 5 attack scenarios |
-| **Likelihood × Impact + DREAD** | Score and rank every threat | Risk register with 25 entries; DREAD deep-dive on top 5 |
+| **Likelihood × Impact + DREAD** | Score and rank every threat | Risk register with 31 entries; DREAD deep-dive on top 5 |
 
 ### 1.3 Regulatory Context
 
@@ -239,20 +238,20 @@ Each letter represents a different type of attack:
 
 ### 3.2 STRIDE Threat Summary
 
-> **Note on scope:** 25 threats are carried forward to the risk register and
+> **Note on scope:** 31 threats are carried forward to the risk register and
 > scored. The per-category counts below reflect the full enumeration; threats
 > marked as out-of-scope for the current architecture (physical access,
 > third-party internal posture) are excluded from risk scoring.
 
 | Category | Threats Identified | 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |
 |----------|:-----------------:|:-----------:|:-------:|:---------:|:------:|
-| Spoofing | 4 | 1 | 2 | 1 | 0 |
-| Tampering | 4 | 0 | 2 | 2 | 0 |
-| Repudiation | 3 | 0 | 2 | 1 | 0 |
-| Information Disclosure | 6 | 1 | 2 | 2 | 1 |
-| Denial of Service | 4 | 0 | 1 | 2 | 1 |
-| Elevation of Privilege | 4 | 0 | 2 | 2 | 0 |
-| **Total** | **25** | **2** | **11** | **10** | **2** |
+| Spoofing | 5 | 2 | 2 | 1 | 0 |
+| Tampering | 5 | 3 | 2 | 0 | 0 |
+| Repudiation | 5 | 0 | 2 | 2 | 1 |
+| Information Disclosure | 6 | 4 | 2 | 0 | 0 |
+| Denial of Service | 5 | 0 | 3 | 0 | 2 |
+| Elevation of Privilege | 5 | 3 | 2 | 0 | 0 |
+| **Total** | **31** | **12** | **13** | **3** | **3** |
 
 ### 3.3 MITRE ATT&CK Coverage
 
@@ -309,7 +308,7 @@ audiences and answer different questions.
 
 | Method | Audience | Question Answered | Applied To |
 |--------|----------|------------------|------------|
-| **Likelihood × Impact (L×I)** | Executive, governance, programme management | *Which threats matter most and in what order?* | All 25 threats |
+| **Likelihood × Impact (L×I)** | Executive, governance, programme management | *Which threats matter most and in what order?* | All 31 threats |
 | **DREAD** | Security engineers, developers, red team | *How technically exploitable is this specific vulnerability?* | Top 5 threats only |
 
 L×I is fast, consistent, and easy to communicate to non-technical
@@ -408,10 +407,10 @@ impact is always the most urgent priority.
 ### 4.4 Risk Distribution
 
 ```mermaid
-pie title Risk Distribution — 25 Threats
-    "Critical (16–25)" : 2
-    "High (10–15)" : 11
-    "Medium (5–9)" : 10
+pie title Risk Distribution — 31 Threats
+    "Critical (16–25)" : 12
+    "High (10–15)" : 13
+    "Medium (5–9)" : 4
     "Low (1–4)" : 2
 ```
 
@@ -454,7 +453,7 @@ does not meet UK GDPR or NHS DSPT security requirements.
 | GAP-9 | I4 | HSTS headers configured | Low |
 | GAP-10 | I5 | S3 backup bucket public access blocked | Low |
 
-**Full gap register (18 gaps) available in:** [`reports/analyses/security-control-mapping.md`](analyses/security-control-mapping.md)
+**Full gap register (18 gaps) available in:** [`reports/analyses/security-control-mapping.md`](reports/analyses/security-control-mapping.md)
 
 ---
 
@@ -463,7 +462,7 @@ does not meet UK GDPR or NHS DSPT security requirements.
 ### 6.1 Pre-Launch — Must Fix Before Go-Live
 
 These eight actions must be completed before the platform accepts live patient
-PHI. They comprise the 2 Critical-scored threats plus 6 High-scored threats
+PHI. They comprise the highest-scoring Critical threats plus High-scored threats
 where remediation effort is low (≤1 week) and deferral risk is operationally
 unacceptable — consistent with standard risk-based pre-launch decision-making.
 
@@ -607,11 +606,11 @@ if successfully exploited:
 | I1 | SQL Injection — PHI Breach | Mass patient record exfiltration | 🔴 Immediate — entire DB at risk |
 | I5 | Exposed Backup Files | Public exposure of full patient DB backup | 🔴 Immediate — 100,000 patients |
 | S1 | Credential Theft via Phishing | Clinician account compromise → PHI access | 🟠 Within 24 hrs of confirmation |
-| S3 | Credential Stuffing | Patient account takeover → PHI access | 🟠 Within 24 hrs of confirmation |
+| S3 | Token Forgery | Patient account takeover → PHI access | 🟠 Within 24 hrs of confirmation |
 | T1 | Patient Record Modification | Integrity breach of health records | 🟠 Within 24 hrs of confirmation |
-| T5 | Ransomware via Phishing | Availability loss + potential exfiltration | 🔴 Immediate — dual notification likely |
-| E2 | Insider Bulk Export | Deliberate exfiltration by authorised user | 🟠 Within 24 hrs of confirmation |
-| I3 | Third-Party Data Leak | PHI shared with unauthorised external party | 🟠 Within 24 hrs of confirmation |
+| T5 | Vitals Data Tampering | Availability loss + potential exfiltration | 🔴 Immediate — dual notification likely |
+| E2 | Doctor → Admin Privilege | Deliberate exfiltration by authorised user | 🟠 Within 24 hrs of confirmation |
+| I3 | Verbose Error Messages | PHI shared with unauthorised external party | 🟠 Within 24 hrs of confirmation |
 
 #### Operational Readiness Gap
 
@@ -641,11 +640,11 @@ penalty.
 
 | Appendix | Document | Contents |
 |----------|----------|---------|
-| A | [`reports/analyses/stride-threats.md`](analyses/stride-threats.md) | All 25 STRIDE threats, full register |
-| B | [`reports/analyses/mitre-mapping.md`](analyses/mitre-mapping.md) | MITRE ATT&CK mapping, 5 attack chains |
-| C | [`reports/analyses/kill-chain-analysis.md`](analyses/kill-chain-analysis.md) | 5 kill chain scenarios with controls |
-| D | [`reports/analyses/risk-register.md`](analyses/risk-register.md) | Full risk register with DREAD scores |
-| E | [`reports/analyses/security-control-mapping.md`](analyses/security-control-mapping.md) | 53 controls mapped, 18 gaps identified |
+| A | [`reports/analyses/stride-threats.md`](reports/analyses/stride-threats.md) | All 31 STRIDE threats, full register |
+| B | [`reports/analyses/mitre-mapping.md`](reports/analyses/mitre-mapping.md) | MITRE ATT&CK mapping, 5 attack chains |
+| C | [`reports/analyses/kill-chain-analysis.md`](reports/analyses/kill-chain-analysis.md) | 5 kill chain scenarios with controls |
+| D | [`reports/analyses/risk-register.md`](reports/analyses/risk-register.md) | Full risk register with DREAD scores |
+| E | [`reports/analyses/security-control-mapping.md`](reports/analyses/security-control-mapping.md) | 53 controls mapped, 18 gaps identified |
 | F | [`diagrams/architecture.md`](../diagrams/architecture.md) | System architecture diagram |
 | G | [`diagrams/dfd-level0.md`](../diagrams/dfd-level0.md) | Level 0 data flow diagram |
 | H | [`diagrams/dfd-level1.md`](../diagrams/dfd-level1.md) | Level 1 data flow diagram |
