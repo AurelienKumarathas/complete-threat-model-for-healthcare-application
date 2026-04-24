@@ -218,12 +218,29 @@ than simple Likelihood × Impact.
 ## Risk Distribution
 
 ```mermaid
-pie title Risk Distribution — 31 Threats
+pie title Risk Distribution — 31 Threats (Likelihood × Impact scoring)
     "Critical (16-25)" : 2
     "High (10-15)" : 13
     "Medium (5-9)" : 14
     "Low (1-4)" : 2
 ```
+
+> **📌 Note on Critical count — two scoring systems in use:**
+> This register uses **Likelihood × Impact (L×I)** thresholds, where Critical
+> = score ≥ 16. By this measure, **2 threats** are Critical (I1 at 20, S1 at 16).
+>
+> The STRIDE threat register (`stride-threats.md`) uses **healthcare severity
+> labels**, where any threat with Impact = 5 (catastrophic PHI breach or patient
+> harm) is labelled Critical regardless of likelihood — giving **12 Critical**
+> threats. This is standard practice in clinical risk frameworks where a
+> low-probability catastrophic outcome still demands pre-launch mitigation.
+>
+> **Both counts are correct for their purpose:**
+> - Use L×I scores (this file) for engineering prioritisation and sprint planning
+> - Use severity labels (`stride-threats.md`) for clinical risk communication and executive reporting
+>
+> The full methodology bridge is documented in
+> [`threat-model-report.md` §4.1](../threat-model-report.md#41-risk-scoring-methodology).
 
 ---
 
@@ -319,3 +336,5 @@ risk assessment.
 | **Residual risk** | Risk that remains after all mitigations have been applied |
 | **Risk appetite** | The level of risk an organisation formally accepts as tolerable |
 | **Risk owner** | The individual accountable for remediating a specific risk |
+| **Severity label** | Clinical risk classification (Critical/High/Medium/Low) based on impact magnitude, used in `stride-threats.md` — a threat with Impact = 5 is Critical regardless of likelihood |
+| **L×I threshold** | Quantitative priority band derived from Likelihood × Impact score, used in this register — Critical requires score ≥ 16 |
