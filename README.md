@@ -27,6 +27,7 @@ The recommended first action is deploying AWS WAF in front of the API Gateway �
 
 - [Overview](#overview)
 - [What Was Modelled](#what-was-modelled)
+- [Assumptions & Scope](#assumptions--scope)
 - [Methodology](#methodology)
 - [Architecture](#architecture)
 - [Threat Coverage](#threat-coverage)
@@ -62,6 +63,19 @@ This is not a theoretical exercise — every threat, attack path, and control re
 | **Users** | Patients, doctors, admins, lab integrations |
 | **Infrastructure** | ECS containers, RDS PostgreSQL, API Gateway, S3, VPC |
 | **Integrations** | Lab result feeds, NHS login (OAuth), email/SMS notifications |
+
+---
+
+## Assumptions & Scope
+
+This is a **design-phase threat model** for a fictional platform. The following assumptions and boundaries apply:
+
+- **Cloud provider trust** — AWS managed services (e.g. RDS, S3, API Gateway) are treated as trusted building blocks configured according to vendor best practices. Underlying AWS infrastructure hardening is out of scope.
+- **Identity and endpoints** — Corporate endpoints, staff devices, and the NHS login identity provider are modelled only as trust boundaries, not fully threat-modelled systems in their own right.
+- **Operational processes** — SOC runbooks, detailed incident response procedures, and backup/restore processes are referenced at a high level but not exhaustively modelled.
+- **Data and traffic** — All patient data is entirely fictitious. No live traffic or production systems are involved; this mirrors the kind of threat model produced before a real build.
+
+These assumptions match how a threat model would normally be scoped at architecture review time and can be tightened in future iterations when more implementation detail is available.
 
 ---
 
@@ -234,7 +248,7 @@ Once loaded, the Navigator matrix shows:
 | 🟡 Yellow | Medium severity (DREAD 6.0–7.9) — DoS, Repudiation threats |
 | ⬜ Grey | Tactics present in ATT&CK but not applicable to this architecture |
 
-The two unhighlighted tactic columns — **Lateral Movement** and **Command & Control** — represent the acknowledged coverage gaps documented in [`reports/analyses/mitre-mapping.md`](reports/analyses/mitre-mapping.md), and will be addressed in the next iteration of this threat model.
+The two unhighlighted tactic columns — **Lateral Movement** and **Command & Control** — represent the acknowledged coverage gaps documented in [`reports/analyses/mitre-mapping.md`](reports/analyses/mitre-mapping.md), and will be addressed in the next iteration of this threat model. The layer has been imported and validated in the ATT&CK Navigator web UI to confirm it renders correctly.
 
 ---
 
@@ -256,10 +270,10 @@ This section documents how this threat model would be extended in a real engagem
 
 ### Coverage gaps I would close
 
-- **Map Lateral Movement (T1021 — Remote Services)** — currently the largest gap in the ATT&CK layer; critical for modelling how an attacker moves from a compromised ECS container to the RDS database layer
-- **Map Command & Control (T1071 — Application Layer Protocol)** — models how an attacker maintains persistence and exfiltrates data over HTTPS without triggering standard network alerts
-- **Formalise the NHS login (OAuth) integration as a separate threat surface** — the current model treats it as a single trust boundary crossing; a full OAuth threat model would apply STRIDE across all four OAuth grant flows
-- **Add a UBA detection rule set** — translate the insider threat scenario into concrete Splunk/Elastic detection queries (bulk export >500 records, off-hours access, geolocation anomalies) so the model produces actionable detection engineering output
+- **Map Lateral Movement (T1021 — Remote Services)** — currently the largest gap in the ATT&CK layer; critical for modelling how an attacker moves from a compromised ECS container to the RDS database layer. This would be the focus of the next iteration once Phase 0 and Phase 1 risks in the risk register are mitigated, and would drive concrete detections around remote service use between application and data tiers.
+- **Map Command & Control (T1071 — Application Layer Protocol)** — models how an attacker maintains persistence and exfiltrates data over HTTPS without triggering standard network alerts. This would be addressed alongside lateral movement, informing detection rules around unusual outbound HTTPS patterns from application components.
+- **Formalise the NHS login (OAuth) integration as a separate threat surface** — the current model treats it as a single trust boundary crossing; a full OAuth threat model would apply STRIDE across all four OAuth grant flows.
+- **Add a UBA detection rule set** — translate the insider threat scenario into concrete Splunk/Elastic detection queries (bulk export >500 records, off-hours access, geolocation anomalies) so the model produces actionable detection engineering output.
 
 ---
 
