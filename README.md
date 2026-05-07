@@ -1,7 +1,6 @@
-# Complete-threat-model-for-healthcare-application
-Healthcare platform threat model using STRIDE, MITRE ATT&CK, Cyber Kill Chain, attack trees, DREAD risk scoring, and NIST CSF control mapping. 31 threats identified across 6 categories.
+# Solaris Care Connect 360 — Healthcare Threat Model
 
-# Complete Threat Model
+Healthcare platform threat model using STRIDE, MITRE ATT&CK, Cyber Kill Chain, attack trees, DREAD risk scoring, and NIST CSF control mapping. 31 threats identified across 6 categories.
 
 ![Security](https://img.shields.io/badge/Security-Threat%20Modelling-red?style=for-the-badge&logo=shield&logoColor=white)
 ![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK%20Mapped-orange?style=for-the-badge)
@@ -10,6 +9,17 @@ Healthcare platform threat model using STRIDE, MITRE ATT&CK, Cyber Kill Chain, a
 ![NHS DSPT](https://img.shields.io/badge/Compliance-NHS%20DSPT-0072CE?style=for-the-badge)
 
 > *I built this to show how I'd approach threat modelling on a healthcare system — working through 31 threats across the full attack surface, mapping each one to MITRE ATT&CK, scoring by risk, and tying everything back to what actually needs fixing before go-live. The platform is fictional; the methodology and findings reflect what I'd produce on a real engagement.*
+
+---
+
+## 🗺️ How to Read This Repo
+
+| Start here | What you'll find |
+|-----------|-----------------|
+| [`reports/threat-model-report.md`](reports/threat-model-report.md) | Full consolidated report — executive summary, findings, remediation roadmap |
+| [`reports/analyses/risk-register.md`](reports/analyses/risk-register.md) | DREAD-scored risk register — all 31 threats prioritised |
+| [`reports/solaris-layer.json`](reports/solaris-layer.json) | ATT&CK Navigator layer — import at [mitre-attack.github.io/attack-navigator](https://mitre-attack.github.io/attack-navigator/) to visualise tactic coverage |
+| [`diagrams/`](diagrams/) | Architecture, data flow diagrams, and attack trees |
 
 ---
 
@@ -219,17 +229,7 @@ Full simulation with detection point analysis is in [`reports/threat-model-repor
 
 `solaris-layer.json` is a **MITRE ATT&CK Navigator layer file** — a machine-readable JSON export that visualises exactly which ATT&CK tactics and techniques are relevant to this threat model, colour-coded by severity.
 
-### What it contains
-
-Every MITRE ATT&CK technique mapped in this threat model is encoded in the layer file with:
-- **Technique ID and name** (e.g. T1190 — Exploit Public-Facing Application)
-- **Colour score** — techniques are heat-mapped by DREAD risk score (red = critical, amber = high, yellow = medium)
-- **Comment** — the specific Solaris threat each technique maps to (e.g. "SQL injection on patient records API — DREAD 9.4")
-- **Tactic context** — each technique is pinned to its correct ATT&CK tactic column
-
 ### How to import it into ATT&CK Navigator
-
-ATT&CK Navigator is a free, browser-based tool maintained by MITRE. No account or installation required.
 
 1. Open [https://mitre-attack.github.io/attack-navigator/](https://mitre-attack.github.io/attack-navigator/) in your browser
 2. Click **"Open Existing Layer"**
@@ -237,64 +237,57 @@ ATT&CK Navigator is a free, browser-based tool maintained by MITRE. No account o
 4. Choose `reports/solaris-layer.json` from this repository
 5. The matrix will load showing all 21 mapped techniques highlighted across 10 ATT&CK tactics
 
-### What you will see
-
-Once loaded, the Navigator matrix shows:
+### Colour key
 
 | Colour | Meaning |
 |--------|---------|
-| 🔴 Red | Critical severity (DREAD ≥ 9.0) — SQL Injection, Exposed Backup |
-| 🟠 Orange | High severity (DREAD 8.0–8.9) — Credential Stuffing, Phishing, Insider Abuse |
-| 🟡 Yellow | Medium severity (DREAD 6.0–7.9) — DoS, Repudiation threats |
-| ⬜ Grey | Tactics present in ATT&CK but not applicable to this architecture |
-
-The two unhighlighted tactic columns — **Lateral Movement** and **Command & Control** — represent the acknowledged coverage gaps documented in [`reports/analyses/mitre-mapping.md`](reports/analyses/mitre-mapping.md), and will be addressed in the next iteration of this threat model. The layer has been imported and validated in the ATT&CK Navigator web UI to confirm it renders correctly.
+| 🔴 Red | Critical severity (DREAD ≥ 9.0) |
+| 🟠 Orange | High severity (DREAD 8.0–8.9) |
+| 🟡 Yellow | Medium severity (DREAD 6.0–7.9) |
+| ⬜ Grey | Not applicable to this architecture |
 
 ---
 
 ## What I Would Do Next
 
-This section documents how this threat model would be extended in a real engagement — covering validation, automation, and coverage gaps.
-
 ### If this were a real product
 
-- **Live penetration test** — scope the API Gateway and auth endpoints for a black-box test to validate whether the SQLi and IDOR findings are truly exploitable, not just theoretically present. Theoretical identification and confirmed exploitation are two different risk levels.
-- **Purple team exercise** — run the Day 5 phishing scenario with a red team and measure whether the email sandbox control actually breaks the kill chain as modelled. Controls that look good on paper frequently fail under realistic conditions.
-- **Threat model refresh cadence** — schedule a mandatory re-review at every major architecture change: new third-party integration, new data classification, new AWS service. Threat models go stale faster than code.
+- **Live penetration test** — scope the API Gateway and auth endpoints for a black-box test to validate whether the SQLi and IDOR findings are truly exploitable
+- **Purple team exercise** — run the Day 5 phishing scenario with a red team and measure whether the email sandbox control actually breaks the kill chain as modelled
+- **Threat model refresh cadence** — mandatory re-review at every major architecture change
 
 ### If this were integrated into a CI/CD pipeline
 
-- **[Semgrep](https://semgrep.dev/)** — static analysis rules to catch SQL injection patterns and hardcoded credentials at PR merge, before code reaches staging. Custom rules can be written to flag the exact IDOR pattern identified in this model.
-- **[Checkov](https://www.checkov.io/)** — infrastructure-as-code scanning to flag S3 buckets missing Object Lock, overly permissive security groups, and unencrypted RDS instances automatically on every Terraform plan.
-- **[OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)** — automated CVE scanning of Node.js dependencies on every build, ensuring newly disclosed vulnerabilities in third-party packages are caught before deployment.
+- **Semgrep** — static analysis rules to catch SQL injection patterns and hardcoded credentials at PR merge
+- **Checkov** — IaC scanning to flag S3 buckets missing Object Lock and unencrypted RDS instances automatically
+- **OWASP Dependency-Check** — automated CVE scanning of Node.js dependencies on every build
 
 ### Coverage gaps I would close
 
-- **Map Lateral Movement (T1021 — Remote Services)** — currently the largest gap in the ATT&CK layer; critical for modelling how an attacker moves from a compromised ECS container to the RDS database layer. This would be the focus of the next iteration once Phase 0 and Phase 1 risks in the risk register are mitigated, and would drive concrete detections around remote service use between application and data tiers.
-- **Map Command & Control (T1071 — Application Layer Protocol)** — models how an attacker maintains persistence and exfiltrates data over HTTPS without triggering standard network alerts. This would be addressed alongside lateral movement, informing detection rules around unusual outbound HTTPS patterns from application components.
-- **Formalise the NHS login (OAuth) integration as a separate threat surface** — the current model treats it as a single trust boundary crossing; a full OAuth threat model would apply STRIDE across all four OAuth grant flows.
-- **Add a UBA detection rule set** — translate the insider threat scenario into concrete Splunk/Elastic detection queries (bulk export >500 records, off-hours access, geolocation anomalies) so the model produces actionable detection engineering output.
+- Map **Lateral Movement (T1021)** — currently the largest gap in the ATT&CK layer
+- Map **Command & Control (T1071)** — models attacker persistence over HTTPS
+- Formalise the **NHS login (OAuth) integration** as a separate threat surface
+- Add a **UBA detection rule set** — translate the insider threat scenario into concrete Splunk/Elastic detection queries
 
 ---
 
 ## Skills Demonstrated
 
 ### Security Engineering
-- **Threat Modelling (STRIDE):** Systematic identification and categorisation of 31 threats across all six STRIDE categories applied to a realistic cloud architecture
-- **Risk Scoring (DREAD):** Quantitative risk scoring enabling priority-ordered remediation — the highest-scoring threat (SQLi, 9.4) was identified as a pre-launch blocker
-- **Attack Tree Analysis:** Multi-path attacker goal decomposition with AND/OR node logic used to identify the lowest-effort attack path (credential stuffing, zero skill required)
-- **MITRE ATT&CK Mapping:** Every threat mapped to specific ATT&CK techniques, with a Navigator layer file for visual tactic coverage review
+- **Threat Modelling (STRIDE):** Systematic identification of 31 threats across all six STRIDE categories
+- **Risk Scoring (DREAD):** Quantitative scoring enabling priority-ordered remediation
+- **Attack Tree Analysis:** Multi-path attacker goal decomposition with AND/OR node logic
+- **MITRE ATT&CK Mapping:** Every threat mapped to specific techniques, with Navigator layer file
 
 ### DevSecOps & Secure Architecture
-- **Security-by-design:** Controls recommended at the architecture stage, not as afterthoughts — demonstrating shift-left security thinking
-- **NIST CSF Control Mapping:** All 31 threats mapped to NIST CSF functions (Identify, Protect, Detect, Respond, Recover) with implementation status tracked
-- **Compliance Awareness:** NHS DSPT mandatory standards, UK GDPR Article 32, and ICO 72-hour breach notification obligations (Article 33) applied throughout
-- **Immutable Infrastructure Security:** AWS-specific recommendations including S3 Object Lock, CloudTrail log integrity, and VPC flow log analysis
+- **Security-by-design:** Controls recommended at the architecture stage — shift-left security thinking
+- **NIST CSF Control Mapping:** All 31 threats mapped to NIST CSF functions with implementation status tracked
+- **Compliance Awareness:** NHS DSPT, UK GDPR Article 32, ICO 72-hour breach notification obligations applied throughout
 
 ### Documentation & Communication
-- **Executive-ready risk register:** DREAD-scored risk register structured for both technical teams and non-technical stakeholders
-- **Cyber Kill Chain analysis:** Full kill chain documented per threat, enabling both detection engineering and incident response planning
-- **APT simulation:** Realistic day-by-day attack timeline demonstrating understanding of real attacker behaviour and dwell time
+- **Executive-ready risk register:** Structured for both technical teams and non-technical stakeholders
+- **Cyber Kill Chain analysis:** Full kill chain documented per threat
+- **APT simulation:** Realistic day-by-day attack timeline demonstrating understanding of real attacker behaviour
 
 ---
 
@@ -303,24 +296,24 @@ This section documents how this threat model would be extended in a real engagem
 ```
 complete-threat-model-for-healthcare-application/
 │
-├── README.md                                    # Project overview and documentation
-├── LICENSE                                      # MIT Licence
+├── README.md                                    # This file
+├── LICENSE
 │
 ├── diagrams/
-│   ├── architecture.md                          # System architecture and trust boundaries
-│   ├── attack-trees.md                          # Attack trees for all attacker goals
-│   ├── dfd-level0.md                            # Level 0 Data Flow Diagram (context)
-│   └── dfd-level1.md                            # Level 1 Data Flow Diagram (detail)
+│   ├── architecture.md
+│   ├── attack-trees.md
+│   ├── dfd-level0.md
+│   └── dfd-level1.md
 │
 └── reports/
-    ├── threat-model-report.md                   # Full consolidated threat model report
-    ├── solaris-layer.json                        # ATT&CK Navigator layer — import at mitre-attack.github.io/attack-navigator
+    ├── threat-model-report.md                   # Full consolidated report — start here
+    ├── solaris-layer.json                        # ATT&CK Navigator layer
     └── analyses/
-        ├── stride-threats.md                    # STRIDE threat catalogue (31 threats)
-        ├── mitre-mapping.md                     # MITRE ATT&CK technique mapping
-        ├── kill-chain-analysis.md               # Cyber Kill Chain per attack scenario
-        ├── risk-register.md                     # DREAD-scored risk register
-        └── security-control-mapping.md          # NIST CSF control mapping and gap analysis
+        ├── stride-threats.md
+        ├── mitre-mapping.md
+        ├── kill-chain-analysis.md
+        ├── risk-register.md
+        └── security-control-mapping.md
 ```
 
 ---
